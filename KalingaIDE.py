@@ -5,6 +5,7 @@ import sys
 import io
 import time
 import threading
+import re
 
 class KalingaIDE:
     def __init__(self, root):
@@ -126,24 +127,26 @@ class KalingaIDE:
         self.text.tag_remove("string", "1.0", tk.END)
         self.text.tag_remove("comment", "1.0", tk.END)
 
+        # Regular expressions for syntax highlighting
         keywords = r'\b(def|class|if|else|elif|for|while|return|import|from|try|except|finally|with|as|and|or|not|is|in)\b'
         strings = r'".*?"|\'.*?\''
         comments = r'#.*?$'
 
-        self.apply_syntax_highlight(keywords, "keyword")
-        self.apply_syntax_highlight(strings, "string")
-        self.apply_syntax_highlight(comments, "comment")
+        self.apply_syntax_highlight(keywords, "keyword", "blue")
+        self.apply_syntax_highlight(strings, "string", "green")
+        self.apply_syntax_highlight(comments, "comment", "gray")
 
-    def apply_syntax_highlight(self, pattern, tag):
+    def apply_syntax_highlight(self, pattern, tag, color):
         """Apply syntax highlighting for the given pattern and tag."""
         start_idx = "1.0"
         while True:
             start_idx = self.text.search(pattern, start_idx, stopindex=tk.END, regexp=True)
             if not start_idx:
                 break
+            # Define the end position based on match length
             end_idx = f"{start_idx}+{len(self.text.get(start_idx, start_idx + '+100c'))}c"
             self.text.tag_add(tag, start_idx, end_idx)
-            self.text.tag_configure(tag, foreground="blue" if tag == "keyword" else "green" if tag == "string" else "gray")
+            self.text.tag_configure(tag, foreground=color)
             start_idx = end_idx
 
     def new_file(self):
